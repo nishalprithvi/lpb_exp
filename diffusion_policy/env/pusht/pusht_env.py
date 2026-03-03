@@ -36,6 +36,9 @@ class PushTEnv(gym.Env):
             render_size=140,
             reset_to_state=None,
             hardcode_reset=True,
+            obstacle_enabled=False,
+            obstacle_center=(320, 256),
+            obstacle_radius=30.0,
         ):
         self._seed = None
         self.seed()
@@ -86,6 +89,12 @@ class PushTEnv(gym.Env):
         self.reset_to_state = reset_to_state
         self.hardcode_reset = hardcode_reset
 
+        self.obstacle_enabled = obstacle_enabled
+        self.obstacle_center = np.array(obstacle_center, dtype=np.float64)
+        self.obstacle_radius = float(obstacle_radius)
+        self.hit_obstacle = False
+        self.obstacle_shape = None
+
     def reset(self):
         seed = self._seed
         self._setup()
@@ -120,6 +129,7 @@ class PushTEnv(gym.Env):
         self._set_state(state)
 
         self.n_contact_points_per_step = 0
+        self.hit_obstacle = False
         observation = self._get_obs()
         
         return observation
@@ -192,11 +202,13 @@ class PushTEnv(gym.Env):
         n_contact_points_per_step = int(np.ceil(self.n_contact_points / n_steps))
         self.n_contact_points_per_step = n_contact_points_per_step
         info = {
-            'pos_agent': np.array(self.agent.position),
-            'vel_agent': np.array(self.agent.velocity),
-            'block_pose': np.array(list(self.block.position) + [self.block.angle % (2 * np.pi)]),
-            'goal_pose': self.goal_pose,
-            'n_contacts': n_contact_points_per_step}
+            "pos_agent": np.array(self.agent.position),
+            "vel_agent": np.array(self.agent.velocity),
+            "block_pose": np.array(list(self.block.position) + [self.block.angle % (2 * np.pi)]),
+            "goal_pose": self.goal_pose,
+            "n_contacts": n_contact_points_per_step,
+            "collision_obstacle": bool(self.hit_obstacle)
+        }
         return info
 
     def _render_frame(self, mode):
@@ -263,6 +275,10 @@ class PushTEnv(gym.Env):
     def _handle_collision(self, arbiter, space, data):
         self.n_contact_points += len(arbiter.contact_point_set.points)
 
+    def _handle_obstacle_collision(self, arbiter, space, data):
+        self.hit_obstacle = True
+        return True
+
     def _set_state(self, state):
         if isinstance(state, np.ndarray):
             state = state.tolist()
@@ -327,10 +343,22 @@ class PushTEnv(gym.Env):
         self.goal_color = pygame.Color('LightGreen')
         self.goal_pose = np.array([256,256,np.pi/4])  # x, y, theta (in radians)
 
+        if self.obstacle_enabled:
+            self.obstacle_shape = self._add_obstacle(
+                tuple(self.obstacle_center.tolist()),
+                self.obstacle_radius
+            )
+
         # Add collision handling
         self.collision_handeler = self.space.add_collision_handler(0, 0)
         self.collision_handeler.post_solve = self._handle_collision
+
+        if self.obstacle_enabled:
+            self.obstacle_collision_handler = self.space.add_collision_handler(0, 2)
+            self.obstacle_collision_handler.begin = self._handle_obstacle_collision
+
         self.n_contact_points = 0
+        self.hit_obstacle = False
 
         self.max_score = 50 * 100
         self.success_threshold = 0.95    # 95% coverage.
@@ -338,6 +366,15 @@ class PushTEnv(gym.Env):
     def _add_segment(self, a, b, radius):
         shape = pymunk.Segment(self.space.static_body, a, b, radius)
         shape.color = pygame.Color('LightGray')    # https://htmlcolorcodes.com/color-names
+        return shape
+
+    def _add_obstacle(self, center, radius):
+        shape = pymunk.Circle(self.space.static_body, radius, center)
+        shape.color = pygame.Color("Tomato")
+        shape.elasticity = 0.0
+        shape.friction = 1.0
+        shape.collision_type = 2
+        self.space.add(shape)
         return shape
 
     def add_circle(self, position, radius):

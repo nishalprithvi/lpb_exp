@@ -1,0 +1,55 @@
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Packaging / build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test / type-check cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE/editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+job_logs/
+
+# ML experiment artifacts and checkpoints
+wandb/
+outputs_phase2_pusht/
+outputs/
+checkpoints/
+
+# Large datasets (keep local, do not commit)
+data/
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Generated media is already excluded via outputs_phase2_pusht/ and outputs/
+PUSHT_PHASE2_RUNBOOK.md
+PUSHT_PHASE2_EXEC_SUMMARY.md

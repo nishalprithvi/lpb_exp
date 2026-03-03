@@ -1,0 +1,27 @@
+# Phase-2 PushT evaluation config with LPB OOD mechanism disabled.
+# OOD planner guidance is disabled by setting guidance_scale=0 and threshold=1e9.
+# This keeps behavior equivalent to plain diffusion policy unless explicit obstacle guidance is enabled.
+
+task_name: pusht_phase2
+
+dataset:
+  zarr_path: data/pusht/pusht_cchi_v7_replay.zarr
+
+policy:
+  guidance_mode: none
+  guidance_scale: 0.0
+  threshold: 1000000000.0
+  obstacle_guidance_scale: 0.15
+  obstacle_margin: 12.0
+  guidance_start_timestep: 35
+
+env:
+  obstacle_enabled_train: false
+  obstacle_enabled_eval: true
+  obstacle_center: [320.0, 256.0]
+  obstacle_radius: 38.0
+
+evaluation:
+  seeds: [0, 1, 2, 3]
+  max_steps: 400
+  fps: 10

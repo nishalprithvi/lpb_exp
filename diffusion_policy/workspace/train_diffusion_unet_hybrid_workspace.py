@@ -268,7 +268,7 @@ class TrainDiffusionUnetHybridWorkspace(BaseWorkspace):
                 if (self.epoch % cfg.training.checkpoint_every) == 0:
                     # checkpointing
                     if cfg.checkpoint.save_last_ckpt:
-                        self.save_checkpoint(tag=str(self.epoch))
+                        self.save_checkpoint(tag="latest", use_thread=False)
                     if cfg.checkpoint.save_last_snapshot:
                         self.save_snapshot()
 

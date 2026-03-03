@@ -183,6 +183,16 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
         self.num_inference_steps = num_inference_steps
         self.correct_num = 0
 
+        # Phase-2 guidance controls (defaults preserve original behavior)
+        self.guidance_mode = kwargs.pop("guidance_mode", "none")
+        self.obstacle_guidance_scale = float(kwargs.pop("obstacle_guidance_scale", 0.0))
+        self.obstacle_margin = float(kwargs.pop("obstacle_margin", 10.0))
+        self.guidance_start_timestep = int(kwargs.pop("guidance_start_timestep", 10))
+        self.obstacle_center = kwargs.pop("obstacle_center", None)
+        self.obstacle_radius = kwargs.pop("obstacle_radius", None)
+        self.guidance_scale = float(kwargs.pop("guidance_scale", 0.0))
+        self.threshold = float(kwargs.pop("threshold", 1e9))
+
         print("Diffusion params: %e" % sum(p.numel() for p in self.model.parameters()))
         print("Vision params: %e" % sum(p.numel() for p in self.obs_encoder.parameters()))
         ## =========================== load language model ===========================
@@ -190,6 +200,14 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
             self.text_model, self.tokenizer, self.max_length = get_text_model(
                 'libero_10', 'clip'
             )
+
+    def set_obstacle_guidance(self, center, radius, enabled=True):
+        if center is None or radius is None or not enabled:
+            self.obstacle_center = None
+            self.obstacle_radius = None
+            return
+        self.obstacle_center = torch.tensor(center, dtype=torch.float32, device=self.device).view(1, 1, 2)
+        self.obstacle_radius = float(radius)
 
     def initialize_planner(self,
                            planner_target,
@@ -257,6 +275,18 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
                 guidance_scale = self.guidance_scale
                 grad_scale = guidance_scale * (1 - scheduler.alphas_cumprod[t]).sqrt()
                 trajectory = trajectory.detach() + grad_scale * cond_grad
+
+            if self.guidance_mode == "obstacle" and self.obstacle_center is not None and self.obstacle_radius is not None and t < self.guidance_start_timestep:
+                trajectory0 = scheduler.step(model_output, t, trajectory).pred_original_sample
+                action_traj = self.normalizer["action"].unnormalize(trajectory0[..., :self.action_dim])
+                center = self.obstacle_center.to(device=trajectory.device, dtype=trajectory.dtype)
+                dist = torch.linalg.norm(action_traj - center, dim=-1)
+                safe_r = float(self.obstacle_radius) + float(self.obstacle_margin)
+                obstacle_loss = torch.relu(safe_r - dist).pow(2).sum()
+                obstacle_grad = torch.autograd.grad(obstacle_loss, trajectory, retain_graph=False, allow_unused=True)[0]
+                if obstacle_grad is not None:
+                    alpha = float(self.obstacle_guidance_scale) * (1 - scheduler.alphas_cumprod[t]).sqrt()
+                    trajectory = trajectory.detach() - alpha * obstacle_grad
 
             # 3. compute previous image: x_t -> x_t-1
             trajectory = scheduler.step(
@@ -329,14 +359,23 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
             cond_mask[:,:To,Da:] = True
 
         # run sampling
-        with torch.no_grad():
+        if self.guidance_mode == "obstacle":
             nsample = self.guided_conditional_sample(
-                cond_data, 
+                cond_data,
                 cond_mask,
                 local_cond=local_cond,
                 global_cond=global_cond,
                 current_obs=dict_apply(obs_dict, lambda x: x[:, -1:, ...]),
                 **self.kwargs)
+        else:
+            with torch.no_grad():
+                nsample = self.guided_conditional_sample(
+                    cond_data,
+                    cond_mask,
+                    local_cond=local_cond,
+                    global_cond=global_cond,
+                    current_obs=dict_apply(obs_dict, lambda x: x[:, -1:, ...]),
+                    **self.kwargs)
         # unnormalize prediction
         naction_pred = nsample[...,:Da]
         action_pred = self.normalizer['action'].unnormalize(naction_pred)

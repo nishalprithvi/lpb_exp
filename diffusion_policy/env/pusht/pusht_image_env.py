@@ -10,13 +10,19 @@ class PushTImageEnv(PushTEnv):
             legacy=False,
             block_cog=None, 
             damping=None,
-            render_size=140):
+            render_size=140,
+            obstacle_enabled=False,
+            obstacle_center=(320, 256),
+            obstacle_radius=30.0):
         super().__init__(
             legacy=legacy, 
             block_cog=block_cog,
             damping=damping,
             render_size=render_size,
-            render_action=False)
+            render_action=False,
+            obstacle_enabled=obstacle_enabled,
+            obstacle_center=obstacle_center,
+            obstacle_radius=obstacle_radius)
         ws = self.window_size
         self.observation_space = spaces.Dict({
             'image': spaces.Box(
