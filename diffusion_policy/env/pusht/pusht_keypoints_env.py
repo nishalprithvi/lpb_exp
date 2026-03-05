@@ -10,6 +10,9 @@ class PushTKeypointsEnv(PushTEnv):
             block_cog=None, 
             damping=None,
             render_size=96,
+            obstacle_enabled=False,
+            obstacle_center=(320, 256),
+            obstacle_radius=30.0,
             keypoint_visible_rate=1.0, 
             agent_keypoints=False,
             draw_keypoints=False,
@@ -23,7 +26,10 @@ class PushTKeypointsEnv(PushTEnv):
             damping=damping,
             render_size=render_size,
             reset_to_state=reset_to_state,
-            render_action=render_action)
+            render_action=render_action,
+            obstacle_enabled=obstacle_enabled,
+            obstacle_center=obstacle_center,
+            obstacle_radius=obstacle_radius)
         ws = self.window_size
 
         if local_keypoint_map is None:

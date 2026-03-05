@@ -7,6 +7,12 @@ __pycache__/
 .venv/
 venv/
 env/
+.conda/
+
+# Environment / local config
+.env
+.env.*
+.python-version
 
 # Packaging / build
 build/
@@ -14,10 +20,16 @@ dist/
 *.egg-info/
 .eggs/
 
-# Test / type-check cache
+# Test / type-check / coverage cache
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+.pyre/
+.tox/
+.nox/
+.coverage
+.coverage.*
+htmlcov/
 
 # Jupyter
 .ipynb_checkpoints/
@@ -32,38 +44,35 @@ dist/
 .DS_Store
 Thumbs.db
 
-# Logs
+# Logs and runtime artifacts
 *.log
+*.out
+*.err
+*.pid
 job_logs/
+MUJOCO_LOG.TXT
 
 # ML experiment artifacts and checkpoints
 wandb/
-outputs_phase2_pusht/
 outputs/
+outputs_phase2_pusht/
+outputs_phase2_libero/
+outputs_phase2_libero_next/
+outputs_phase2_pusht_next/
+outputs_smoke_pusht/
+outputs_phase2_combined/
 checkpoints/
+models/pretrained/
 
-# Large datasets (keep local, do not commit)
+# Large datasets and local externals
 data/
+third_party/
 
 # Temporary files
 tmp/
 temp/
 *.tmp
 
-# Generated media is already excluded via outputs_phase2_pusht/ and outputs/
+# Local documentation notes (kept private)
 PUSHT_PHASE2_RUNBOOK.md
 PUSHT_PHASE2_EXEC_SUMMARY.md
-
-# Phase-2 experiment artifacts
-outputs_phase2_libero/
-outputs_phase2_libero_next/
-outputs_phase2_pusht_next/
-outputs_smoke_pusht/
-outputs_phase2_combined/
-
-# Pretrained checkpoints and local externals
-models/pretrained/
-third_party/
-
-# MuJoCo runtime logs
-MUJOCO_LOG.TXT
