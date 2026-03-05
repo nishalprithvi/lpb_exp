@@ -1,8 +1,10 @@
-import os
 import glob
+from pathlib import Path
 
-current_path = os.getcwd()
-current_path = '/store/real/zhanyis/diffusion_policy/'
+# Resolve bddl files from the local repository instead of relying on a
+# machine-specific absolute path.
+repo_root = Path(__file__).resolve().parents[2]
+current_path = str(repo_root)
 
 bddl_file_name_dict = {}
 
@@ -95,5 +97,7 @@ bddl_file_name_dict_correct = {
 }
 
 for k, v in bddl_file_name_dict_correct.items():
-    assert v in bddl_file_name_dict.values()
-    bddl_file_name_dict[k] = v
+    # Some legacy aliases may not exist in every checkout; only register
+    # aliases that resolve to an available local bddl file.
+    if Path(v).exists():
+        bddl_file_name_dict[k] = v

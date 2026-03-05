@@ -206,7 +206,7 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
             self.obstacle_center = None
             self.obstacle_radius = None
             return
-        self.obstacle_center = torch.tensor(center, dtype=torch.float32, device=self.device).view(1, 1, 2)
+        self.obstacle_center = torch.tensor(center, dtype=torch.float32, device=self.device).view(1, 1, -1)
         self.obstacle_radius = float(radius)
 
     def initialize_planner(self,
@@ -280,7 +280,9 @@ class DiffusionUnetHybridImagePolicy(BaseImagePolicy):
                 trajectory0 = scheduler.step(model_output, t, trajectory).pred_original_sample
                 action_traj = self.normalizer["action"].unnormalize(trajectory0[..., :self.action_dim])
                 center = self.obstacle_center.to(device=trajectory.device, dtype=trajectory.dtype)
-                dist = torch.linalg.norm(action_traj - center, dim=-1)
+                center_dim = center.shape[-1]
+                action_pos = action_traj[..., :center_dim]
+                dist = torch.linalg.norm(action_pos - center, dim=-1)
                 safe_r = float(self.obstacle_radius) + float(self.obstacle_margin)
                 obstacle_loss = torch.relu(safe_r - dist).pow(2).sum()
                 obstacle_grad = torch.autograd.grad(obstacle_loss, trajectory, retain_graph=False, allow_unused=True)[0]

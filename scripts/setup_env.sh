@@ -78,7 +78,9 @@ activate_venv_env() {
     gym==0.21.0 \
     pygame==2.1.2 \
     robomimic==0.3.0 \
-    opencv-python==4.6.0.66
+    opencv-python==4.6.0.66 \
+    "Cython<3" \
+    mujoco-py==2.1.2.14
 }
 
 if command -v conda >/dev/null 2>&1; then

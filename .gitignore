@@ -53,3 +53,17 @@ temp/
 # Generated media is already excluded via outputs_phase2_pusht/ and outputs/
 PUSHT_PHASE2_RUNBOOK.md
 PUSHT_PHASE2_EXEC_SUMMARY.md
+
+# Phase-2 experiment artifacts
+outputs_phase2_libero/
+outputs_phase2_libero_next/
+outputs_phase2_pusht_next/
+outputs_smoke_pusht/
+outputs_phase2_combined/
+
+# Pretrained checkpoints and local externals
+models/pretrained/
+third_party/
+
+# MuJoCo runtime logs
+MUJOCO_LOG.TXT
