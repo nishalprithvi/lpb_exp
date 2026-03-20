@@ -1,0 +1,77 @@
+# -----------------------------
+# OS / Editor metadata
+# -----------------------------
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# -----------------------------
+# Python cache / build artifacts
+# -----------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+build/
+dist/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# -----------------------------
+# Virtual environments
+# -----------------------------
+.venv/
+venv/
+env/
+
+# -----------------------------
+# Environment / secrets
+# -----------------------------
+.env
+.env.*
+*.pem
+*.key
+
+# -----------------------------
+# Logs / runtime artifacts
+# -----------------------------
+logs/
+job_logs/
+*.log
+*.out
+*.err
+
+# -----------------------------
+# Experiment outputs and large generated artifacts
+# -----------------------------
+outputs/
+outputs_*/
+**/videos/
+**/analysis/
+**/rollout_bank/
+**/failure_bank/
+**/localization/
+
+# -----------------------------
+# Datasets and checkpoints (large binaries)
+# -----------------------------
+data/
+checkpoints/
+models/
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.zarr
+*.zip
+
+# -----------------------------
+# Optional reports generated during experiments
+# -----------------------------
+reports/*.tmp
