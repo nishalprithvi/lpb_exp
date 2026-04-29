@@ -6,9 +6,9 @@ hydra:
 dynamics_model_checkpoint: 'data/transport/model_ckpt/dyn_model/checkpoints/model_60.pth'
 policy_checkpoint: 'data/transport/model_ckpt/base_policy/checkpoints/270.ckpt'
 guidance_start_timestep: 10
-guidance_scale: 0.2
+guidance_scale: 0.0
 
-threshold: 2.8
+threshold: 1e9
 n_test: 50
 test_start_seed: 100000
 n_action_steps: 15

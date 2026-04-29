@@ -1,0 +1,28 @@
+# config.yaml
+hydra:
+  run:
+    dir: .
+
+dynamics_model_checkpoint: "data/pusht/model_ckpt/dyn_model/checkpoints/model_50.pth"
+policy_checkpoint: "data/pretrained/pusht/pusht_image_dp.ckpt"
+
+guidance_start_timestep: 10
+guidance_scale: 0.0
+threshold: 1e9
+
+n_test: 50
+test_start_seed: 100000
+n_action_steps: 8
+
+output_dir: "data/pusht_test"
+
+device: "cuda"
+
+# Environment runner configuration
+env_runner_target: "diffusion_policy.env_runner.pusht_image_runner.PushTImageRunner"
+
+# Planner configuration
+planner_target: "dyn_model.planner_pusht.PlannerPushT"
+
+# Demo dataset path
+demo_dataset_path: "data/pusht/pusht_cchi_v7_replay.zarr"
